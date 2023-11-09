@@ -1,0 +1,255 @@
+---
+title: "Some basics of mapping in R"
+author: "Brittany Barker"
+date: 11/8/23
+format: revealjs
+---
+
+---
+format: 
+  revealjs:
+    slide-number: c/t
+    width: 1600
+    height: 900
+    css: ["theme/theme.css"]
+    theme: simple
+    echo: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(here) # Start in R project directory
+```
+
+## About me
+
+:::: {.columns}
+
+::: {.column width="40%"}
+```{r, echo = FALSE, out.width = "600px"}
+knitr::include_graphics(here("mapping_demo", "images", "intro_me.jpg"))
+```
+:::
+
+::: {.column width="60%"}
+**Current position**  
+- Snr. Research Associate, Oregon IPM Center, OSU  
+<br/>
+**Research interests**  
+- Modeling, ecology, biogeography, conservation  
+<br/>
+**Hobbies**  
+- Running, hiking, biking, moving!  
+- Gardening, native habitat restoration  
+- Artistic and creative endeavors    
+<br/>
+**R Community**  
+- Co-organize "Aggregate" meetups  
+- Co-organize Cascadia R Conference
+
+:::
+
+::::
+
+##
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo = FALSE, out.width = "1600px"}
+knitr::include_graphics(here("mapping_demo", "images", "twitter_tidy.png"))
+```
+:::
+
+::: {.column width="50%"}
+
+```{r, echo = FALSE, out.width = "700px"}
+knitr::include_graphics(here("mapping_demo", "images", "twitter_purrr.png"))
+```
+:::
+
+::::
+
+## Outline of demo
+
+- Short presentation    
+- Walk through code (participation welcome)  
+- (If time) Shiny app that works w/ spatial data  
+
+```{r, out.width = "650px", echo=FALSE, fig.align="left", fig.cap="Source: Zia Ahmed"}
+knitr::include_graphics(here("mapping_demo", "images", "Geospatial_R.png"))
+```
+
+## Elements of Geographic Information System (GIS)
+
+```{r, out.width = "650px", echo=FALSE, fig.align="center", fig.cap="Source: Mierzejowska & Pomyko 2019"}
+knitr::include_graphics(here("mapping_demo", "images", "GIS.png"))
+```
+
+## Why use R for GIS?
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Advantages**  
+- It's *FREE*!!!  
+- Automate and repeat tasks  
+- Easier to make reproducible workflow  
+- Extend functionality  
+- Faster than pointing/clicking  
+
+```{r, out.width = "650px", echo=FALSE, fig.align="left", fig.cap="Source: Aleks Buczkowski 2023"}
+knitr::include_graphics(here("mapping_demo", "images", "Why-is-ArcGIS-So-Expensive.png"))
+```
+
+:::
+
+::: {.column width="50%"}
+
+**Disadvantages**  
+- Sometimes a steep learning curve  
+- Honestly I can't think of others  
+
+```{r, out.width = "400px", echo=FALSE, fig.align="left"}
+knitr::include_graphics(here("mapping_demo", "images", "programmer_meme.jpg"))
+```
+
+:::
+
+::::
+
+## Types of spatial features: vector
+
+- Uses points and/or line segments to identify locations on earth  
+
+```{r, out.width = "650px", echo=FALSE, fig.align="center", fig.cap="Different types of vectors (source: Jakub Nowosad)"}
+knitr::include_graphics(here("mapping_demo", "images", "vector.png"))
+```
+
+## Types of spatial features: raster
+
+- Gridded data where each pixel (cell) is associated with a specific geographical location  
+- Can be numerical or categorical  
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, out.width = "650px", echo=FALSE, fig.align="left"}
+knitr::include_graphics(here("mapping_demo", "images", "forest_cover.jpg"))
+```
+:::
+
+::: {.column width="50%"}
+
+```{r, echo = FALSE, out.width = "700px", fig.cap="Source: Jakub Nowosad"}
+knitr::include_graphics(here("mapping_demo", "images", "cont_vs_cat.png"))
+```
+:::
+
+::::
+
+## R packages for working with vectors
+
+- `sf` (simple features) 
+- More convenient and flexible than older `sp` package  
+- Integration with the tidyverse  
+- Emphasis on the spatial geometry of real world objects   
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r, echo = FALSE, out.width = "1000px", fig.align="center-aligned"}
+knitr::include_graphics(here("mapping_demo", "images", "sf-relations.png"))
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r, echo = FALSE, out.width = "650px", fig.cap="center-aligned", fig.cap = "Source: Jakub Nowosad"}
+knitr::include_graphics(here("mapping_demo", "images", "sf-area.png"))
+```
+
+:::
+
+::::
+
+## R packages for working with rasters
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+`terra` (successor of `raster`)  
+- Extensive documentation
+
+```{r, echo = FALSE, out.width = "600px", fig.cap="center-aligned", fig.cap = "Jakub Nowosad"}
+knitr::include_graphics(here("mapping_demo", "images", "new-terra.png"))
+```
+
+:::
+
+::: {.column width="50%"}
+
+`stars`(spatiotemporal arrays)  
+- Many `sf` functions have methods for stars objects  
+- Not as well documented as `terra`  
+
+```{r, echo = FALSE, out.width = "800px", fig.cap="Source: Edzer Pebesama"}
+knitr::include_graphics(here("mapping_demo", "images", "cube1.png"))
+```
+:::
+
+::::
+
+## Layering
+
+- Oftentimes we want to make maps with multiple spatial features  
+
+```{r, out.width = "650px", echo=FALSE, fig.align="center"}
+knitr::include_graphics(here("mapping_demo", "images", "layering.png"))
+```
+
+## In comes `ggplot`
+
+- Uses layered approach to create graphics (The Grammar of Graphics) 
+- You provide the data, tell `ggplot2` how to map variables to aesthetics, what graphical elements to use, and it takes care of the details
+
+```{r, echo = FALSE, out.width = "800px", fig.cap="Source: R for the rest of us"}
+knitr::include_graphics(here("mapping_demo", "images", "grammar-of-graphics.png"))
+```
+
+## In comes `ggplot`
+
+- `ggplot2` can plot all sorts of data, including rasters and vectors  
+
+```{r, echo = FALSE, out.width = "800px",  fig.align="left", fig.cap="Source: www.icertglobal.com"}
+knitr::include_graphics(here("mapping_demo", "images", "ggplot_plots.png"))
+```
+
+## Example: a ggplot combining raster and vectors
+
+- Map of the phenology and potential distribution for invasive emerald ash borer    
+- What are the vectors vs. rasters in this map?  
+
+:::: {.columns}
+
+::: {.column width="75%"}
+
+```{r, echo = FALSE, out.width = "1500px", fig.cap="center-aligned", fig.cap="Source: Barker et al. (2023) *Frontiers in Insect Science*"}
+knitr::include_graphics(here("mapping_demo", "images", "EAB_map.png"))
+```
+
+:::
+
+::: {.column width="25%"}
+
+```{r, echo = FALSE, out.width = "250px"}
+knitr::include_graphics(here("mapping_demo", "images", "emerald-ash-borer-on-leaf.png"))
+```
+:::
+
+::::

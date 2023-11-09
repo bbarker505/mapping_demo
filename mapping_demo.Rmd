@@ -1,0 +1,260 @@
+---
+title: "Some basics of mapping in R"
+author: "Brittany Barker"
+date: "`r format(Sys.Date(), tz = 'America/Los_Angeles')`"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(here) # Start in R project directory
+library(dplyr) # Data wrangling
+library(lubridate) # Working with dates
+library(ggplot2) # Plotting model outputs
+library(patchwork) # Combine plots
+library(viridis) # Color palettes for ggplot2
+library(knitr) # Including graphics
+library(sf) # Working with spatial features
+library(terra) # Working with rasters
+library(USAboundaries) # Boundary features
+```
+
+### **Purpose of this demo**
+
+Provide some examples of using the [`terra`](https://rspatial.org/pkg/index.html), [`sf`](https://r-spatial.github.io/sf/), and [`ggplot2`](https://ggplot2.tidyverse.org/) packages to work with geospatial data and create beautiful maps. 
+
+### **Mapping predicted vs. observed dates of lilac phenophases**
+
+```{r, echo=FALSE, out.width = c("30%", "70%")}
+knitr::include_graphics(c(here("images", "lilac_leaf_buds.jpg"),
+                        here("images", "NPN_phenophase.jpg")))
+```
+<br/>
+In the following exercises, we will visualize spatial concordance between model-predicted and observed dates of lilac leaf out, which is a phenophase of lilac in which new leaves appear. A **phenophase** is an observable stage of an animal's or plant's life cycle that can be defined by a start and end point. All data were derived from the [USA National Phenology Network](https://www.usanpn.org/usa-national-phenology-network), an organization that hosts phenology models and maintains a database of volunteer-contributed observations of phenology for ecologically and economically important species of plants and insects in the USA.
+
+#### **(1) Mapping predicted lilac leaf out**
+
+We import raster data for model predictions of lilac leaf out for 2018 using the `rast()` function in `terra`.
+```{r}
+lilacModel <- rast(here("data", "lilac_2018_model.tiff"))
+```
+
+The raster is class "SpatRaster". The raster's coordinate reference system is "lon/lat NAD83" (often used for North America) and its values range from `6` to `223`, which corresponds the day in which lilac leaf out was predicted to occur in `2018`. 
+```{r}
+class(lilacModel)
+lilacModel
+```
+
+The raster can be visualized using the base `plot()` function in R. This function can produce some decent looking maps, but not nearly as nice as `ggplot2` maps in my opinion. Plants develop slower in colder temperatures, which is why lilac leaf out occurs at later dates in higher-latitude and higher-elevation areas.
+```{r}
+plot(lilacModel)
+```
+
+For plotting with `ggplot2`, we convert the raster to a data frame because geoms for gridded data (i.e., `geom_raster()` and `geom_tile()`) require data frames. Additionally, I have found that it's often easier to manipulate data frames than rasters. However, I just discovered the `tidyterra` package, which has it's own set of geoms for `ggplot2` (e.g., `geom_spatraster()`)! This is definitely something I'll investigate further.
+
+Notice that `as.data.frame()` in the `terra` package retains coordination information (`x` and `y` columns) by setting the `xy` option to `TRUE`. 
+```{r}
+# Conver raster data to a data frame 
+lilacModel_df <- terra::as.data.frame(lilacModel, xy = TRUE) 
+head(lilacModel_df)
+```
+
+We'll use a `dplyr` pipeline to `rename()` the data column to `leaf_out`, convert the day of year to a calendar date, and then use the `floor_date()` function from the [`lubridate`](https://lubridate.tidyverse.org/) package to bin the dates by week of the year. 
+```{r}
+# Reformat data
+lilacModel_df2 <- lilacModel_df %>%
+  rename(leaf_out_doy = layer) %>% # New column name
+  mutate(leaf_out_date = as.Date(leaf_out_doy, origin = "2018-01-01")) %>% # Convert day of year to calendar date
+  group_by(leaf_out_week = factor(lubridate::floor_date(leaf_out_date, 'week'))) %>% # Create bins of dates
+  ungroup()
+```
+
+Notice that the data frame now has data in numerical (class "num"), date (class "Date"), and categorical (class "factor") formats.
+```{r}
+str(lilacModel_df2)
+```
+
+Now let's use `ggplot2` to visualize the predicted week of lilac leaf out for 2018 (i.e., our raster). A custom scale function from the [`viridis`](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html) package, `scale_fill_viridis_d()`, is used to color the discrete data (i.e., weeks of the year) from blue to yellow. 
+```{r, fig.height = 5, fig.width=9.5}
+# Create a map using ggplot2
+ggplot() + 
+  geom_raster(data = lilacModel_df2, aes(x = x, y = y, fill = leaf_out_week)) +
+  scale_fill_viridis_d("Predicted 1st\nLeaf Out DOY", option = "viridis") +
+  ggtitle("2018 Predicted Lilac Leaf Out") 
+```
+
+This map looks okay, but it would arguably look better without the default gray background, grid lines, and axes features. If you plan on building multiple ggplots, it's more concise to define your theme a single time rather than repeating it each time you make a new plot.
+```{r}
+# Custom theme
+my_theme <- theme(panel.grid= element_blank(),
+                 panel.background = element_blank(), 
+                 panel.border = element_blank(),
+                 axis.title = element_blank(), 
+                 axis.text = element_blank(),
+                 axis.ticks = element_blank(),
+                 title = element_text(face = "bold"),
+                 legend.key.size = unit(0.4, "cm"))
+```
+
+Apply the custom theme to the plot.
+```{r, fig.height = 5, fig.width=9.5}
+# Create a map using ggplot2
+ggplot() + 
+  geom_raster(data = lilacModel_df2, aes(x = x, y = y, fill = leaf_out_week)) +
+  scale_fill_viridis_d("Predicted 1st\nLeaf Out DOY", option = "viridis") +
+  ggtitle("2018 Predicted Lilac Leaf Out") +  
+  my_theme # Our custom theme
+```
+
+#### **(2) Adding state features to map**
+
+The map is more informative if we add state boundaries. We'll use an R package called [`USAboundaries`](https://github.com/ropensci/USAboundaries) to get these data using the `us_states()` function. In the pipeline, we subset data for the contiguous U.S. (CONUS) using `filter()`. The feature is projected to the the NAD83 coordiante reference system and converted to a multi-line string using `st_cast()`.
+```{r}
+# Simple feature ("sf") for US states
+states <- us_states(resolution = "high") %>%
+  filter(jurisdiction_type == "state" & !name %in% c("Alaska", "Hawaii")) %>%
+  st_transform(crs = 4269) %>%
+  st_cast("MULTILINESTRING") 
+```
+
+The code block below is the same as above except it adds the `states` feature.
+```{r, fig.height = 5, fig.width=9.5}
+# Create a map using ggplot2
+ggplot() + 
+  geom_raster(data = lilacModel_df2, aes(x = x, y = y, fill = leaf_out_week)) +
+  geom_sf(data = states) +
+  scale_fill_viridis_d("Week of Predicted\n1st Leaf Out", option = "viridis") + 
+  ggtitle("2018 Predicted Lilac Leaf Out") +
+  my_theme
+```
+
+
+#### **(3) Adding phenometric data to the map**
+
+How do model-predicted dates of lilac leaf out compared with observed dates? To answer this question, we import phenometric data for observed lilac leaf out dates for 2018. These data were collected by volunteers and submitted to the USA National Phenology Network's database. 
+```{r}
+# Phenometric data
+lilacObs <- read.csv(here("data", "lilac_2018_obs.csv"))
+```
+
+Take a look at the data dimensions. We see that there are 182 observations (rows) and 25 variables. 
+```{r}
+dim(lilacObs)
+```
+
+There are 77 unique sites in the dataset. Our goal is to add data for each of these sites to the map.
+```{r}
+length(unique(lilacObs$site_id))
+```
+
+We only need data in three columns in the phenometric data: `longitude`, `latitude`, and `first_yes_doy`. The `first_yes_doy` column specifies which day of year that lilacs first had leaf out at the site. We'll subset the columns using `select()` and take a look at the first several rows of data. 
+```{r}
+lilacObs <- lilacObs %>%
+  filter(state != "ON") %>% # Remove an observation from Canada
+  dplyr::select("longitude", "latitude", "first_yes_doy") # Subset data by column
+```
+
+Take a look at the first several rows of data.
+```{r}
+head(lilacObs)
+```
+
+To match the format of the model-predicted data, day of year is converted to a calendar date and then binned by week of the year. 
+```{r}
+lilacObs2 <- lilacObs %>%
+  mutate(leaf_out_date = as.Date(first_yes_doy, origin = "2018-01-01")) %>%
+  group_by(leaf_out_week = factor(lubridate::floor_date(leaf_out_date, 'week')))
+```
+
+For plotting purposes, we convert the phenometric data to a simple feature (`sf`) object using the [`st_as_sf()`](https://www.rdocumentation.org/packages/sf/versions/1.0-9/topics/st_as_sf) function. We tell the function which columns contain coordinate information and specify the `crs` argument as [`4269`](https://epsg.io/4269), which corresponds to the NAD83 coordinate reference system. 
+```{r}
+# Convert data frame to a simple feature
+lilacObs_sf <- st_as_sf(lilacObs2, coords = c("longitude", "latitude"), crs = 4269)
+```
+
+Now let's add the phenometric data so we can visualize spatial concordance between model-predicted and observed dates for first leaf out. Sites for each observation are plotted using their coordinate information and colored according to values in the `leaf_out_date` column.
+```{r, fig.height = 5, fig.width=9.5}
+# Add sites to the map
+conus_map <- ggplot() + 
+  geom_raster(data = lilacModel_df2, aes(x = x, y = y, fill = leaf_out_week)) +
+  geom_sf(data = states) +
+  geom_sf(data = lilacObs_sf, aes(color = leaf_out_date), size = 3, show.legend = FALSE) +
+  scale_fill_viridis_d("Week of Predicted\n1st Leaf Out", option = "viridis") + 
+  scale_color_viridis("Week of Observed\n1st Leaf Out", option = "viridis", 
+                      guide = guide_colourbar(reverse = TRUE)) +
+  ggtitle("2018 Predicted Lilac Leaf Out") +
+  my_theme
+conus_map
+```
+
+#### **(4) Map interpretation**
+
+Our map indicates that observed dates of lilac leaf out in 2018 were often earlier than dates predicted by the model. This suggests that our model tends to over-predict this phenophase, and therefore may need to be calibrated. However, notice that two sites had dates that were much later than predicted dates. In this case, perhaps the volunteers failed to notice that lilac leaf out had already occurred, although other explanations are possible.
+
+#### **(5) Combining maps**
+
+Let's say we're interested in results for Michigan and nearby areas in Wisconsin, so we want to create a new map that focuses just on these areas. One way to accomplish this task is to use the `coord_sf()` function, in which the x- and y-limits of the bounding box of interest are defined. We also remove the legend and title.
+
+```{r}
+conus_map +
+    coord_sf(xlim = c(-90.5542, -82.3047), 
+           ylim = c(41.6311, 47.5739),
+           expand = FALSE) + # Take limits exactly as defined
+  theme(legend.position = "none",
+        title = element_blank()) # Remove title and legend
+```
+
+In our final map, we also add county boundaries for the Michigan region, which can be downloaded via `us_counties()`. 
+```{r}
+# Simple feature ("sf") for US counties
+counties <- us_counties(resolution = "high") %>%
+  st_transform(crs = 4269) %>%
+  st_cast("MULTILINESTRING") 
+
+# Final map for Michigan region
+# Lilac leaf out observations are added again so boundary lines don't cover them
+mi_map <- conus_map +
+  geom_sf(data = counties) + # Add counties
+  geom_sf(data = lilacObs_sf, aes(color = leaf_out_date), size = 3, show.legend = FALSE) +
+  coord_sf(xlim = c(-90.5542, -82.3047), 
+           ylim = c(41.6311, 47.5739),
+           expand = FALSE) + # Take limits exactly as defined
+  theme(legend.position = "none",
+        title = element_blank())
+```
+
+Finally, we can combine maps for CONUS and the Michigan region using the [`patchwork`](https://patchwork.data-imaginist.com/) package. Other options for combining plots include functions in the [`ggpubr`](https://rpkgs.datanovia.com/ggpubr/) (`ggarrange()`) and [`cowplot`](https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html) (`plot_grid()`) packages. The `\` operator indicates that the map for CONUS goes on top of the Michigan region map, the width setting indicates that the CONUS is map is 2X bigger, and the legend is "collected" to ensure it stays in the correct position (on right-hand side).
+
+```{r}
+# Combine maps
+conus_map / mi_map +
+  plot_layout(guides = "collect", widths = c(2, 1))
+```
+
+### **Wrap-up**
+
+I only scratched the surface of mapping in R!  
+- `ggplot2` has several functions for plotting `sf` objects  
+- Raster data can be converted to data frames and plotted  
+- However, functions in `tidyterra` can directly plot `SpatRaster` rasters  
+- Another option is to convert the raster to a `stars` object and plot it with `geom_stars()`  
+
+### **Potentially useful tutorials, free books, etc.**
+
+Compilation of various resources  
+- [R Spatial data science blogs](https://r-spatial.org/)
+
+Books  
+- [Geocomputation with R](https://r.geocompx.org/) by R. Lovelace et al. (2022)
+- [Geographic Data Science with R](https://bookdown.org/mcwimberly/gdswr-book/) by M.C. Wimberly (2023)
+- [A Crash Course in GIS using R](https://bookdown.org/michael_bcalles/gis-crash-course-in-r/) by M. Branion-Calles (2021)  
+- [Data Analysis and Visualization with R: Spatial](http://www.geo.hunter.cuny.edu/~ssun/R-Spatial/) by S. Sun (2023)
+
+Tutorials/vignettes  
+- [Spatial Data Science with R and "terra"](https://rspatial.org/) by R. Hijmans (2019-2023)
+- [Geospatial Data Science in R](https://zia207.github.io/geospatial-r-github.io/) by Zia Ahmed  
+- [Introduction to GIS with R](https://www.jessesadler.com/post/gis-with-r-intro/) by Jesse Sadler
+- [GIS and Spatial Analysis with R](https://mgimond.github.io/MEGUG2016/Tutorial.html) by Manny Gimmond
+- Vignette for [sf](https://r-spatial.github.io/sf/articles/sf1.html)  
+- [R as GIS for Economists](https://tmieno2.github.io/R-as-GIS-for-Economists/create-maps.html) by Taro Mieno
