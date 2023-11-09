@@ -169,6 +169,17 @@ pre code {
 </div>
 
 
+<p>Load all required packages.</p>
+<pre class="r"><code>library(here) # Start in R project directory
+library(dplyr) # Data wrangling
+library(lubridate) # Working with dates
+library(ggplot2) # Plotting model outputs
+library(patchwork) # Combine plots
+library(viridis) # Color palettes for ggplot2
+library(knitr) # Including graphics
+library(sf) # Working with spatial features
+library(terra) # Working with rasters
+library(USAboundaries) # Boundary features</code></pre>
 <div id="purpose-of-this-demo" class="section level3">
 <h3><strong>Purpose of this demo</strong></h3>
 <p>Provide some examples of using the <a href="https://rspatial.org/pkg/index.html"><code>terra</code></a>, <a href="https://r-spatial.github.io/sf/"><code>sf</code></a>, and <a href="https://ggplot2.tidyverse.org/"><code>ggplot2</code></a> packages to work with geospatial data and create beautiful maps.</p>

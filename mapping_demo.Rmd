@@ -6,8 +6,8 @@ output:
   html_document: default
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+Load all required packages.
+```{r, warning = FALSE, message = FALSE}
 library(here) # Start in R project directory
 library(dplyr) # Data wrangling
 library(lubridate) # Working with dates

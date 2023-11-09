@@ -1,26 +1,26 @@
 {
-    "id": "C48942BC",
-    "path": "~/R/My_demos/mapping_demo/mapping_demo.Rmd",
-    "project_path": "mapping_demo.Rmd",
+    "id": "9B5A072A",
+    "path": "~/R/My_demos/parallel_demo/parallel_R.Rmd",
+    "project_path": null,
     "type": "r_markdown",
     "hash": "0",
     "contents": "",
     "dirty": false,
-    "created": 1699573505222.0,
+    "created": 1699573794956.0,
     "source_on_save": false,
-    "relative_order": 1,
+    "relative_order": 3,
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "26,57",
-        "scrollLine": "9"
+        "cursorPosition": "28,0",
+        "scrollLine": "24"
     },
     "folds": "",
-    "lastKnownWriteTime": 1699573975,
+    "lastKnownWriteTime": 1612983530,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1699573975199,
+    "last_content_update": 1612983530,
     "read_only": false,
     "read_only_alternatives": []
 }
