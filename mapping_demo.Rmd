@@ -136,7 +136,7 @@ ggplot() +
 How do model-predicted dates of lilac leaf out compared with observed dates? To answer this question, we import phenometric data for observed lilac leaf out dates for 2018. These data were collected by volunteers and submitted to the USA National Phenology Network's database. 
 ```{r}
 # Phenometric data
-lilacObs <- read.csv("./data/lilac_2018_obs.csv"))
+lilacObs <- read.csv("./data/lilac_2018_obs.csv")
 ```
 
 Take a look at the data dimensions. We see that there are 182 observations (rows) and 25 variables. 
@@ -223,6 +223,7 @@ mi_map <- conus_map +
            expand = FALSE) + # Take limits exactly as defined
   theme(legend.position = "none",
         title = element_blank())
+mi_map
 ```
 
 Finally, we can combine maps for CONUS and the Michigan region using the [`patchwork`](https://patchwork.data-imaginist.com/) package. Other options for combining plots include functions in the [`ggpubr`](https://rpkgs.datanovia.com/ggpubr/) (`ggarrange()`) and [`cowplot`](https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html) (`plot_grid()`) packages. The `\` operator indicates that the map for CONUS goes on top of the Michigan region map, the width setting indicates that the CONUS is map is 2X bigger, and the legend is "collected" to ensure it stays in the correct position (on right-hand side).
@@ -244,18 +245,18 @@ I only scratched the surface of mapping in R!
 ### **Potentially useful tutorials, free books, etc.**
 
 Compilation of various resources  
-- [R Spatial data science blogs](https://r-spatial.org/)
+- [R Spatial data science blogs](https://r-spatial.org/)  
 
 Books  
-- [Geocomputation with R](https://r.geocompx.org/) by R. Lovelace et al. (2022)
-- [Geographic Data Science with R](https://bookdown.org/mcwimberly/gdswr-book/) by M.C. Wimberly (2023)
+- [Geocomputation with R](https://r.geocompx.org/) by R. Lovelace et al. (2022)  
+- [Geographic Data Science with R](https://bookdown.org/mcwimberly/gdswr-book/) by M.C. Wimberly (2023)  
 - [A Crash Course in GIS using R](https://bookdown.org/michael_bcalles/gis-crash-course-in-r/) by M. Branion-Calles (2021)  
 - [Data Analysis and Visualization with R: Spatial](http://www.geo.hunter.cuny.edu/~ssun/R-Spatial/) by S. Sun (2023)
 
 Tutorials/vignettes  
-- [Spatial Data Science with R and "terra"](https://rspatial.org/) by R. Hijmans (2019-2023)
+- [Spatial Data Science with R and "terra"](https://rspatial.org/) by R. Hijmans (2019-2023)  
 - [Geospatial Data Science in R](https://zia207.github.io/geospatial-r-github.io/) by Zia Ahmed  
-- [Introduction to GIS with R](https://www.jessesadler.com/post/gis-with-r-intro/) by Jesse Sadler
-- [GIS and Spatial Analysis with R](https://mgimond.github.io/MEGUG2016/Tutorial.html) by Manny Gimmond
+- [Introduction to GIS with R](https://www.jessesadler.com/post/gis-with-r-intro/) by Jesse Sadler  
+- [GIS and Spatial Analysis with R](https://mgimond.github.io/MEGUG2016/Tutorial.html) by Manny Gimmond  
 - Vignette for [sf](https://r-spatial.github.io/sf/articles/sf1.html)  
-- [R as GIS for Economists](https://tmieno2.github.io/R-as-GIS-for-Economists/create-maps.html) by Taro Mieno
+- [R as GIS for Economists](https://tmieno2.github.io/R-as-GIS-for-Economists/create-maps.html) by Taro Mieno  

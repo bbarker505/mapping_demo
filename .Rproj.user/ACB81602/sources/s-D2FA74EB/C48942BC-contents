@@ -136,7 +136,7 @@ ggplot() +
 How do model-predicted dates of lilac leaf out compared with observed dates? To answer this question, we import phenometric data for observed lilac leaf out dates for 2018. These data were collected by volunteers and submitted to the USA National Phenology Network's database. 
 ```{r}
 # Phenometric data
-lilacObs <- read.csv("./data/lilac_2018_obs.csv"))
+lilacObs <- read.csv("./data/lilac_2018_obs.csv")
 ```
 
 Take a look at the data dimensions. We see that there are 182 observations (rows) and 25 variables. 
