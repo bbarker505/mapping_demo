@@ -8,7 +8,6 @@ output:
 
 Load all required packages.
 ```{r, warning = FALSE, message = FALSE}
-library(here) # Start in R project directory
 library(dplyr) # Data wrangling
 library(lubridate) # Working with dates
 library(ggplot2) # Plotting model outputs
@@ -29,8 +28,8 @@ Provide some examples of using the [`terra`](https://rspatial.org/pkg/index.html
 ### **Mapping predicted vs. observed dates of lilac phenophases**
 
 ```{r, echo=FALSE, out.width = c("30%", "70%")}
-knitr::include_graphics(c(here("images", "lilac_leaf_buds.jpg"),
-                        here("images", "NPN_phenophase.jpg")))
+knitr::include_graphics(c("./images/lilac_leaf_buds.JPG",
+                        "./images/NPN_phenophase.jpg"))
 ```
 <br/>
 In the following exercises, we will visualize spatial concordance between model-predicted and observed dates of lilac leaf out, which is a phenophase of lilac in which new leaves appear. A **phenophase** is an observable stage of an animal's or plant's life cycle that can be defined by a start and end point. All data were derived from the [USA National Phenology Network](https://www.usanpn.org/usa-national-phenology-network), an organization that hosts phenology models and maintains a database of volunteer-contributed observations of phenology for ecologically and economically important species of plants and insects in the USA.
@@ -39,7 +38,7 @@ In the following exercises, we will visualize spatial concordance between model-
 
 We import raster data for model predictions of lilac leaf out for 2018 using the `rast()` function in `terra`.
 ```{r}
-lilacModel <- rast(here("data", "lilac_2018_model.tiff"))
+lilacModel <- rast("./data/lilac_2018_model.tiff")
 ```
 
 The raster is class "SpatRaster". The raster's coordinate reference system is "lon/lat NAD83" (often used for North America) and its values range from `6` to `223`, which corresponds the day in which lilac leaf out was predicted to occur in `2018`. 
@@ -137,7 +136,7 @@ ggplot() +
 How do model-predicted dates of lilac leaf out compared with observed dates? To answer this question, we import phenometric data for observed lilac leaf out dates for 2018. These data were collected by volunteers and submitted to the USA National Phenology Network's database. 
 ```{r}
 # Phenometric data
-lilacObs <- read.csv(here("data", "lilac_2018_obs.csv"))
+lilacObs <- read.csv("./data/lilac_2018_obs.csv"))
 ```
 
 Take a look at the data dimensions. We see that there are 182 observations (rows) and 25 variables. 
