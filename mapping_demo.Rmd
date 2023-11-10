@@ -17,6 +17,8 @@ library(viridis) # Color palettes for ggplot2
 library(knitr) # Including graphics
 library(sf) # Working with spatial features
 library(terra) # Working with rasters
+# issues w/ installing "USAboundaries" so run this code
+#devtools::install_github("ropensci/USAboundaries")
 library(USAboundaries) # Boundary features
 ```
 
