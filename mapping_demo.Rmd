@@ -111,7 +111,7 @@ ggplot() +
 
 #### **(2) Adding state features to map**
 
-The map is more informative if we add state boundaries. We'll use an R package called [`USAboundaries`](https://github.com/ropensci/USAboundaries) to get these data using the `us_states()` function. In the pipeline, we subset data for the contiguous U.S. (CONUS) using `filter()`. The feature is projected to the the NAD83 coordiante reference system and converted to a multi-line string using `st_cast()`.
+The map is more informative if we add state boundaries. We'll use an R package called [`USAboundaries`](https://github.com/ropensci/USAboundaries) to get these data using the `us_states()` function. In the pipeline, we subset data for the contiguous U.S. (CONUS) using `filter()`. The feature is projected to the the NAD83 coordinate reference system and converted to a multi-line string using `st_cast()`.
 ```{r}
 # Simple feature ("sf") for US states
 states <- us_states(resolution = "high") %>%
