@@ -55,7 +55,7 @@ plot(lilacModel)
 
 For plotting with `ggplot2`, we convert the raster to a data frame because geoms for gridded data (i.e., `geom_raster()` and `geom_tile()`) require data frames. Additionally, I have found that it's often easier to manipulate data frames than rasters. However, I just discovered the `tidyterra` package, which has it's own set of geoms for `ggplot2` (e.g., `geom_spatraster()`)! This is definitely something I'll investigate further.
 
-Notice that `as.data.frame()` in the `terra` package retains coordination information (`x` and `y` columns) by setting the `xy` option to `TRUE`. 
+Notice that `as.data.frame()` in the `terra` package retains coordinate information (`x` and `y` columns) by setting the `xy` option to `TRUE`. 
 ```{r}
 # Conver raster data to a data frame 
 lilacModel_df <- terra::as.data.frame(lilacModel, xy = TRUE) 

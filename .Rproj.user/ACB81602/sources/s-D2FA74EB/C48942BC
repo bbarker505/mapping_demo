@@ -3,7 +3,7 @@
     "path": "~/R/My_demos/mapping_demo/mapping_demo.Rmd",
     "project_path": "mapping_demo.Rmd",
     "type": "r_markdown",
-    "hash": "2713491873",
+    "hash": "3520513496",
     "contents": "",
     "dirty": false,
     "created": 1699573505222.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "113,333",
-        "scrollLine": "107"
+        "cursorPosition": "57,71",
+        "scrollLine": "51"
     },
     "folds": "",
-    "lastKnownWriteTime": 1699575288,
+    "lastKnownWriteTime": 1699575371,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1699575288392,
+    "last_content_update": 1699575371058,
     "read_only": false,
     "read_only_alternatives": []
 }
