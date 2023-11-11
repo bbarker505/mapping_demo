@@ -213,6 +213,8 @@ counties <- us_counties(resolution = "high") %>%
   st_transform(crs = 4269) %>%
   st_cast("MULTILINESTRING") 
 
+#mi_bbox <- attr(mi$geometry, 'bbox')
+
 # Final map for Michigan region
 # Lilac leaf out observations are added again so boundary lines don't cover them
 mi_map <- conus_map +
@@ -260,3 +262,7 @@ Tutorials/vignettes
 - [GIS and Spatial Analysis with R](https://mgimond.github.io/MEGUG2016/Tutorial.html) by Manny Gimmond  
 - Vignette for [sf](https://r-spatial.github.io/sf/articles/sf1.html)  
 - [R as GIS for Economists](https://tmieno2.github.io/R-as-GIS-for-Economists/create-maps.html) by Taro Mieno  
+
+### **Acknowledgements**
+
+Parts of this demo were modified from a tutorial for the [`rnpn`](https://cran.r-project.org/web/packages/rnpn/index.html) package created by Alyssa Rosemartin. Raster and observation data used for the demo were downloaded from the USA National Phenology Network's servers using `rnpn`.
