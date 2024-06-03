@@ -1,0 +1,371 @@
+---
+title: "Introduction to GIS and mapping in R"
+author: "Brittany Barker"
+date: "`r format(Sys.Date(), tz = 'America/Los_Angeles')`"
+output:
+  html_document: default
+---
+
+Load all required packages.
+```{r, warning = FALSE, message = FALSE}
+library(dplyr) # Data wrangling
+library(lubridate) # Working with dates
+library(ggplot2) # Plotting model outputs
+library(ggthemes) # ggthemes_data function
+library(patchwork) # Combine plots
+library(viridis) # Color palettes for ggplot2
+library(knitr) # Including graphics
+library(sf) # Working with spatial features
+library(terra) # Working with rasters
+library(tidyterra) # Tidyverse function for SpatRaster objects
+# issues w/ installing "USAboundaries" so run this code
+#devtools::install_github("ropensci/USAboundaries")
+library(rnaturalearth)
+```
+
+### **Purpose of this demo**
+
+Provide some examples of using the [`terra`](https://rspatial.org/pkg/index.html), [`sf`](https://r-spatial.github.io/sf/), and [`ggplot2`](https://ggplot2.tidyverse.org/) packages to work with geospatial data and create beautiful maps. 
+
+### **Mapping predicted vs. observed dates of lilac phenophases**
+
+```{r, echo=FALSE, out.width = c("30%", "70%")}
+knitr::include_graphics(c("./images/lilac_leaf_buds.JPG",
+                        "./images/NPN_phenophase.jpg"))
+```
+<br/>
+In the following exercises, we will visualize spatial concordance between model-predicted and observed dates of lilac leaf out, which is a phenophase of lilac in which new leaves appear. A **phenophase** is an observable stage of an animal's or plant's life cycle that can be defined by a start and end point. All data were derived from the [USA National Phenology Network](https://www.usanpn.org/usa-national-phenology-network), an organization that hosts phenology models and maintains a database of volunteer-contributed observations of phenology for ecologically and economically important species of plants and insects in the USA.
+
+#### **(1) Mapping predicted lilac leaf out**
+
+We import raster data for model predictions of lilac leaf out for 2018 using the `rast()` function in `terra`.
+```{r}
+lilacModel_r <- rast("./data/lilac_2018_model.tiff")
+```
+
+The raster is class "SpatRaster". The raster's coordinate reference system(crs) is "lon/lat NAD83" (often used for North America) and its values range from `6` to `223`, which corresponds the day in which lilac leaf out was predicted to occur in `2018`. 
+```{r}
+class(lilacModel_r)
+lilacModel_r
+```
+We'll go over three approaches for mapping this raster. 
+
+##### **(1a) terra: `plot()`**
+
+The raster can be visualized using the [`plot()` function in `terra`](https://rspatial.github.io/terra/reference/plot.html). This function can produce some decent looking maps, but not as nice as `ggplot2` maps (in my opinion). Below is a couple of examples of using this function. The default color palette is `terrain.colors.` 
+```{r}
+# Continuous predictions
+plot(lilacModel_r)
+```
+
+The color palette can changed using the `col` option. Feel free to test out other palettes.
+```{r}
+# Continuous prediction using a different color palette
+plot(lilacModel_r, col = rev(viridis::viridis(100)))
+```
+
+Raster data can be depicted in bins by specifying "interval" for the `type` option. The number of intervals is defined with the `breaks` option. 
+```{r}
+# Binned predictions (6 breaks)
+plot(lilacModel_r, type="interval", breaks = 8, col = rev(viridis::viridis(8)))
+```
+
+**Question:** How does predicted lilac leaf out vary across CONUS? Any ideas what may explain these patterns? 
+
+
+##### **(1b) Plotting rasters in ggplot2**
+
+We'll cover two ways to plot raster data using `ggplot2`: (1) `geom_raster()`, which requires data to be in a data frame format, and (2) `geom_spatraster()`, which can work directly with `SpatRaster` objects. The latter function is part of the relatively new [`tidyterra` package](https://dieghernan.github.io/tidyterra/). For both examples, days of the year will be binned into months to facilitate comparisons with observed lilac leaf out dates (Exercise X, below). This task requires defining a factor variable, as described below.
+
+###### **`geom_raster()`**
+
+First, the raster is converted into a data frame using `as.data.frame()` in `terra.` The `xy` option to `TRUE` to retain coordinate information (`x` and `y` columns).
+```{r}
+# Convert raster data to a data frame 
+lilacModel_df <- lilacModel_r %>%
+  as.data.frame(xy = TRUE) %>%
+  rename("leaf_out_doy" = layer)
+head(lilacModel_df)
+```
+
+Notice that the data frame now has data in numerical (class `num`), date (class `Date`), and categorical (class `factor`) formats.
+```{r}
+str(lilacModel_df)
+```
+
+Next, we create a data frame that specifies the month for each day of year, which will be used for defining factor levels and for plotting in `ggplot2`.
+```{r}
+# Data frame needed to create pretty plots
+catgories_df <- data.frame(
+  # Day and month of year
+  leaf_out_doy = 1:365, 
+  leaf_out_month = cut_interval(1:365, 12)) %>%
+  # Bin dates by month and re-format labels to remove brackets, parentheses, etc.
+  mutate(leaf_out_month = format(as.Date(
+    leaf_out_doy, origin = "2018-01-01"), "%b"),
+    leaf_out_month = gsub("\\(|\\]|\\[", "", leaf_out_month)) %>%
+  mutate(leaf_out_month = gsub(",", "-", leaf_out_month))
+
+# Convert month to a factor so they're in the right order on plots
+# Factor levels are ordered by day of the year
+catgories_df$leaf_out_month <- factor(
+  catgories_df$leaf_out_month, 
+  levels = unique(catgories_df$leaf_out_month[order(catgories_df$leaf_out_doy)]))
+```
+
+The data frame with factor levels is joined to `lilacModel_df`. Now we have columns for days of year and months of leaf out.
+```{r}
+# Join month labels to lilac predictions
+lilacModel_df <- left_join(lilacModel_df, catgories_df, by = "leaf_out_doy") 
+head(lilacModel_df)
+```
+
+Next, we create some custom labels for the plots, and define a pretty color palette. 
+```{r}
+# Create a vector of labels to show in plot legend
+labs <- unique(catgories_df$leaf_out_month)
+
+# Create a color palette (vector) for the plot
+# Classic cyclic palette in "ggthemes" package
+pal <- ggthemes_data[["tableau"]][["color-palettes"]][["regular"]]$`Classic Cyclic`
+pal <- pal$value # Vector of hex codes for colors
+pal <- pal[1:12] # Keep only 12 colors
+names(pal) <- unique(catgories_df$leaf_out_month) # Name colors by month
+```
+
+Finally, tThe `lilacModel_df` data frame can be plotted using `geom_raster()`. 
+```{r, fig.height = 5, fig.width=9.5}
+# Create a map using ggplot2
+ggplot() + 
+  geom_raster(data = lilacModel_df, aes(x = x, y = y, fill = leaf_out_month)) +
+  scale_fill_manual(name = "Predicted First\nLeaf Out", label = labs, values = pal) +
+  ggtitle("Month of Predicted First Leaf Out in Lilac in 2018") 
+```
+
+This map looks okay but would probably be even better without the default gray background, grid lines, and axes labels. If you plan on building multiple plots, it's more concise to define your custom theme a single time (don't repeat yourself).
+```{r}
+# Custom theme
+my_theme <- theme(#panel.grid= element_blank(),
+                 panel.background = element_blank(), 
+                 panel.border = element_rect(fill = NA),
+                 axis.title = element_blank(), 
+                 #axis.text = element_blank(),
+                 #axis.ticks = element_blank(),
+                 plot.title = element_text(face = "bold", size = 16),
+                 legend.key = element_rect(fill = "white"),
+                 legend.title = element_text(face="bold", size = 12),
+                 legend.text = element_text(size = 11),
+                 legend.key.height = unit(0.0025, "cm"),
+                 legend.key.width = unit(1, "cm"))
+```
+
+Apply the custom theme to the plot.
+```{r, fig.height = 5, fig.width=9.5}
+# Create a map using ggplot2
+ggplot() + 
+  geom_raster(data = lilacModel_df, aes(x = x, y = y, fill = leaf_out_month)) +
+  scale_fill_manual(name = "Predicted First\nLeaf Out", label = labs, values = pal) +  
+  ggtitle("Month of Predicted First Leaf Out in Lilac in 2018") +
+  my_theme # Our custom theme
+```
+
+**QX** Change at least two plot features to align with your preferences. For example, you could remove the plot axes (lat and long), change the legend attributes, font types and sizes, etc. (`my_theme`), or change the color palette (`pal`). 
+```{r}
+
+```
+
+#### **Get State Features and Make Plots**
+
+The map is more informative if we add state boundaries. We'll use an R package called [`rnaturalearth`](https://github.com/ropensci/rnaturalearth) to get these data using the `ne_states()` function. In the pipeline, we obtain the data as an `sf` object and then subset data for the conterminous US (CONUS) using `filter()`. The feature is projected to the same coordinate reference system as the lilac leaf out raster (`lilacModel_r`) and then converted to a multi-line string using `st_cast()`.
+```{r}
+# Create simple feature ("sf") for US states
+states <- ne_states(returnclass = "sf") %>%
+  filter(geonunit == "United States of America" & !name %in% c("Alaska", "Hawaii")) %>%
+  st_cast("MULTILINESTRING")
+```
+
+**QX** What is the coordinate reference system of `states`? 
+
+the `crs` argument as [`4269`](https://epsg.io/4269), which corresponds to the NAD83 coordinate reference system.
+
+Use `geom_sf()` to add an `sf` object to a plot - i.e., the states feature.
+```{r, fig.height = 5, fig.width=9.5}
+# Add an 'sf' object to them map
+ggplot() + 
+  geom_raster(data = lilacModel_df, aes(x = x, y = y, fill = leaf_out_month)) +
+  geom_sf(data = states) +
+  #coord_sf(crs = crs(lilacModel_r)) +
+ # geom_sf_text(data = states, aes(label = postal), size = 2, nudge_x = 0.1, nudge_y = 0.1) +
+  scale_fill_manual(name = "Predicted First\nLeaf Out", label = labs, values = pal) +
+  ggtitle("Month of Predicted First Leaf Out in Lilac in 2018") +
+  my_theme
+```
+
+##### **(1c) ggplot2: `geom_raster()`**
+
+An identical map can be produced using the `geom_spatraster()` function in `tidyterra`, which works directly with `SpatRaster` objects. First, we  convert raster data into a categorical (factor) format for plotting. The `categories_df` data frame is used to define factor levels.
+```{r}
+# Define factor levels of the raster using the "catgories_df" data frame
+levels(lilacModel_r) <- catgories_df
+is.factor(lilacModel_r)
+```
+
+Below, notice how `geom_spatraster()` has replaced `geom_raster()` from the previous example.
+```{r, fig.height = 5, fig.width=9.5}
+# Plot produced using "geom_spatraster"
+ggplot() +
+  geom_spatraster(data = lilacModel_r, aes(fill = leaf_out_month))  +
+  geom_sf(data = states) +
+  scale_fill_manual(name = "Predicted First\nLeaf Out", label = labs, values = pal, na.value = "white") +
+  ggtitle("Month of Predicted First Leaf Out in Lilac in 2018") +
+  my_theme
+```
+
+
+#### **(3) Adding phenometric data to the map**
+
+We can add more layers to our map to ask certain questions, such as: How do model-predicted dates of lilac leaf out compared with observed dates? Below, we import phenometric data for observed lilac leaf out dates for 2018. These data were collected by volunteers and submitted to the USA National Phenology Network's database. 
+
+```{r}
+# Phenometric data
+lilacObs <- read.csv("./data/lilac_2018_obs.csv")
+```
+
+Take a look at the data dimensions. We see that there are 182 observations (rows) and 25 variables. 
+```{r}
+dim(lilacObs)
+```
+
+There are 77 unique sites in the dataset. Our goal is to add data for each of these sites to the map.
+```{r}
+length(unique(lilacObs$site_id))
+```
+
+We only need data in three columns in the phenometric data: `longitude`, `latitude`, and `first_yes_doy`. The `first_yes_doy` column specifies which day of year that lilacs first had leaf out at the site. We'll subset the columns using `select()` and take a look at the first several rows of data. 
+```{r}
+lilacObs <- lilacObs %>%
+  filter(state != "ON") %>% # Remove an observation from Canada
+  dplyr::select("longitude", "latitude", "first_yes_doy") %>%
+  rename("leaf_out_doy" = "first_yes_doy") %>% 
+  left_join(catgories_df, by = "leaf_out_doy") 
+```
+
+Take a look at the first several rows of data.
+```{r}
+head(lilacObs)
+```
+
+For plotting purposes, we convert the phenometric data to a simple feature (`sf`) object using the [`st_as_sf()`](https://www.rdocumentation.org/packages/sf/versions/1.0-9/topics/st_as_sf) function.  
+
+```{r}
+# Convert data frame to a simple feature
+lilacObs_sf <- lilacObs %>%
+   #st_as_sf(coords = c("longitude", "latitude"))
+   st_as_sf(coords = c("longitude", "latitude"), crs = crs(states))
+```
+
+We tell the function which columns contain coordinate information and specify the `crs` argument as [`4269`](https://epsg.io/4269), which corresponds to the NAD83 coordinate reference system.
+
+Now let's add the phenometric data so we can visualize spatial concordance between model-predicted and observed dates for first leaf out. Sites for each observation are plotted using their coordinate information and colored according to values in the `leaf_out_date` column.
+
+```{r, fig.height = 5, fig.width=9.5}
+# Add sites to the map
+conus_map <- ggplot() + 
+  geom_raster(data = lilacModel_df, aes(x = x, y = y, fill = leaf_out_month)) +
+  geom_sf(data = states) +
+  geom_sf(data = lilacObs_sf, aes(color = leaf_out_month), size = 3, show.legend = FALSE) +
+  geom_sf(data = lilacObs_sf, color = "black", size = 3, shape = 1) + # black outlines around sites
+  scale_fill_manual(name = "Month of First\nLeaf Out", label = labs, values = pal, drop = FALSE) +
+  scale_color_manual(name = "Month of First\nLeaf Out", label = labs, values = pal, drop = FALSE) +
+  ggtitle("Predicted vs. Observed 1st Leaf Out in Lilac in 2018") +
+  my_theme
+conus_map
+```
+
+Save your map using `ggsave()` and see how it looks. If you're not happy with it, adjust the image dimensions of change the plot theme (i.e., `mytheme`). 
+```{r}
+ggsave(conus_map, filename = "Lilac_leaf_out_2018.png", dpi = 300, units = c('in'), width = 10, height = 6)
+```
+
+**(QX)** What does your map tell you about predicted vs. observed first leaf out in lilac? Can you think of any better ways to compare the two datasets on a map? 
+
+Our map indicates that observed dates of lilac leaf out in 2018 were often earlier than dates predicted by the model. This suggests that our model tends to over-predict this phenophase, and therefore may need to be calibrated. However, notice that two sites had dates that were much later than predicted dates. In this case, perhaps the volunteers failed to notice that lilac leaf out had already occurred, although other explanations are possible.
+
+#### **(4) Combining maps**
+
+Let's say we're interested in results for a particular region of CONUS, such as a state. The map can be zoomed with the `coord_sf()` function, in which the x- and y-limits of the region are defined. In the commented `coord_sf()` function below, enter your own limits (xmin, xmax, ymin, ymax). 
+```{r}
+# Map for specific region
+# The expand = FALSE ensures that limits are taken exactly as provided
+conus_map +
+  # Define x- and y-limits
+    coord_sf(xlim = c(-90.5542, -82.3047), 
+             ylim = c(41.6311, 47.5739),
+             expand = FALSE) 
+```
+
+We can also add county boundaries, which can be downloaded via `us_counties()`. 
+```{r}
+# Simple feature ("sf") for US counties
+counties <- us_counties(resolution = "high") %>%
+  st_transform(crs = 4269) %>%
+  st_cast("MULTILINESTRING") 
+```
+
+Add the counties to your map below, remove the legend and title, and make any other desired changes. Give the map a name so it can be used for the next step.
+```{r}
+# Final map for Michigan region
+# Lilac leaf out observations are added again so boundary lines don't cover them
+mi_map <- conus_map +
+  geom_sf(data = counties) + # Add counties
+  geom_sf(data = lilacObs_sf, aes(color = leaf_out_date), size = 3, show.legend = FALSE) +
+  coord_sf(xlim = c(-90.5542, -82.3047), 
+           ylim = c(41.6311, 47.5739),
+           expand = FALSE) + # Take limits exactly as defined
+  theme(legend.position = "none",
+        title = element_blank())
+mi_map
+```
+
+Finally, we can combine maps for CONUS and your region of interest using the [`patchwork`](https://patchwork.data-imaginist.com/) package. The `\` operator indicates that the map for CONUS goes on top of the region map, the width setting indicates that the CONUS is map is 2X bigger, and the legend is "collected" to ensure it stays in the correct position (on right-hand side).
+
+```{r}
+# Combine maps using patchwork
+conus_plus_map <- conus_map / mi_map +
+  plot_layout(guides = "collect", widths = c(2, 1))
+conus_plus_map
+```
+
+Note: Other options for combining plots include functions in the [`ggpubr`](https://rpkgs.datanovia.com/ggpubr/) (`ggarrange()`) and [`cowplot`](https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html) (`plot_grid()`) packages. 
+
+### **Wrap-up**
+
+These exercises only scratched the surface of mapping in R! Here's a summary:
+- `ggplot2` has several functions for plotting rasters:  
+  - `geom_raster()` or `geom_tile()`: require a data frame   
+  - `geom_spatrasters(): requires a SpatRaster  
+  - Not covered: `geom_stars()` from the `stars` package  
+- The generic `plot()` function can also be used but has fewer options   
+
+### **Potentially useful tutorials, free books, etc.**
+
+Compilation of various resources  
+- [R Spatial data science blogs](https://r-spatial.org/)  
+
+Books  
+- [Geocomputation with R](https://r.geocompx.org/) by R. Lovelace et al. (2022)  
+- [Geographic Data Science with R](https://bookdown.org/mcwimberly/gdswr-book/) by M.C. Wimberly (2023)  
+- [A Crash Course in GIS using R](https://bookdown.org/michael_bcalles/gis-crash-course-in-r/) by M. Branion-Calles (2021)  
+- [Data Analysis and Visualization with R: Spatial](http://www.geo.hunter.cuny.edu/~ssun/R-Spatial/) by S. Sun (2023)
+
+Tutorials/vignettes  
+- [Spatial Data Science with R and "terra"](https://rspatial.org/) by R. Hijmans (2019-2023)  
+- [Geospatial Data Science in R](https://zia207.github.io/geospatial-r-github.io/) by Zia Ahmed  
+- [Introduction to GIS with R](https://www.jessesadler.com/post/gis-with-r-intro/) by Jesse Sadler  
+- [GIS and Spatial Analysis with R](https://mgimond.github.io/MEGUG2016/Tutorial.html) by Manny Gimmond  
+- Vignette for [sf](https://r-spatial.github.io/sf/articles/sf1.html)  
+- [R as GIS for Economists](https://tmieno2.github.io/R-as-GIS-for-Economists/create-maps.html) by Taro Mieno  
+
+### **Acknowledgements**
+
+Parts of this demo were modified from a tutorial for the [`rnpn`](https://cran.r-project.org/web/packages/rnpn/index.html) package created by Alyssa Rosemartin. Raster and observation data used for the demo were downloaded from the USA National Phenology Network's servers using `rnpn`.
