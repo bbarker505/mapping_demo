@@ -176,6 +176,31 @@ knitr::include_graphics("./images/cont_vs_cat.png")
 
 ::::
 
+
+## Vector vs. raster
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+Multi-polygon: provinces of Spain
+
+```{r, out.width = "1000px", echo=FALSE, fig.cap="Source: Paula Moraga"}
+knitr::include_graphics(here("Intro_R_mapping", "images", "pol_v_rast1.png"))
+```
+:::
+
+::: {.column width="50%"}
+
+Raster: average annual temperature in Spain
+ 
+```{r, echo = FALSE, out.width = "1000px"}
+knitr::include_graphics(here("Intro_R_mapping", "images", "pol_v_rast2.png"))
+```
+:::
+
+::::
+
 ## Types of spatial features: raster
 
 - Multi-layered rasters often called raster stacks  
@@ -289,3 +314,20 @@ knitr::include_graphics("./images/emerald-ash-borer-on-leaf.png")
 :::
 
 ::::
+
+## Components of a CRS
+
+- Coordinate system: X, Y grid upon which data is overlaid  
+- Units: horizontal & vertical units of grid (e.g., km, miles)  
+- Datum: defines origin used to place the coordinate system in space  
+- Projection: equation used to flatten objects to 2D surface  
+
+```{r, echo = FALSE, out.width = "700px", fig.cap = "Source: Bill Huber, https://www.directionsmag.com/article/4048"}
+knitr::include_graphics(here("Intro_R_mapping", "images", "datum_v_proj.gif"))
+```  
+
+## Example map projections
+
+```{r, echo = FALSE, out.width = "1000px", fig.cap = "Planar (left), conic (middle), and cylindrical (right) projections. Source: https://gistbok.ucgis.org/bok-topics/map-projections"}
+knitr::include_graphics(here("Intro_R_mapping", "images", "figure2-projections.png"))
+```
