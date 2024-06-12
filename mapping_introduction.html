@@ -10,9 +10,9 @@
 <link href="mapping_introduction_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.3.450">
 
-  <meta name="author" content="Brittany Barker">
+  <meta name="author" content="Brittany Barker &amp; Roger Andre">
   <meta name="dcterms.date" content="2024-06-21">
-  <title>Some basics of mapping in R</title>
+  <title>Introduction to GIS and mapping in R</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -327,30 +327,31 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Some basics of mapping in R</h1>
+  <h1 class="title">Introduction to GIS and mapping in R</h1>
+  <p class="subtitle">Cascadia R Conference 2024</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
 <div class="quarto-title-author-name">
-Brittany Barker 
+Brittany Barker &amp; Roger Andre 
 </div>
 </div>
 </div>
 
   <p class="date">2024-06-21</p>
 </section>
-<section id="about-me" class="slide level2">
-<h2>About me</h2>
+<section id="about-us-brittany-barker" class="slide level2">
+<h2>About us: Brittany Barker</h2>
 <div class="columns">
 <div class="column" style="width:40%;">
 <div class="cell">
 <div class="cell-output-display">
-<p><img data-src="./images/intro_me.jpg" width="600"></p>
+<p><img data-src="./images/intro_me.jpg" width="500"></p>
 </div>
 </div>
 </div><div class="column" style="width:60%;">
 <p><strong>Current position</strong><br>
-- Asst. Professor (Senior Research), OSU<br>
+- Asst. Research Professor, OSU<br>
 <br> <strong>Research interests</strong><br>
 - Modeling, ecology, biogeography, conservation<br>
 <br> <strong>Hobbies</strong><br>
@@ -363,32 +364,37 @@ Brittany Barker
 </div>
 </div>
 </section>
-<section id="section" class="slide level2">
-<h2></h2>
+<section id="about-us-roger-andre" class="slide level2">
+<h2>About us: Roger Andre</h2>
 <div class="columns">
-<div class="column" style="width:50%;">
+<div class="column" style="width:40%;">
 <div class="cell">
 <div class="cell-output-display">
-<p><img data-src="./images/twitter_tidy.png" width="1600"></p>
+<p><img data-src="./images/intro_me.jpg" width="500"></p>
 </div>
 </div>
-</div><div class="column" style="width:50%;">
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="./images/twitter_purrr.png" width="700"></p>
-</div>
-</div>
+</div><div class="column" style="width:60%;">
+<p><strong>Current position</strong><br>
+- Asst. Research Professor, OSU<br>
+<br> <strong>Research interests</strong><br>
+- Modeling, ecology, biogeography, conservation<br>
+<br> <strong>Hobbies</strong><br>
+- Running, hiking, biking, moving!<br>
+- Gardening, native habitat restoration<br>
+- Artistic and creative endeavors<br>
+<br> <strong>R Community</strong><br>
+- Co-organize “Aggregate” meetups<br>
+- Co-organize Cascadia R Conference</p>
 </div>
 </div>
 </section>
 <section id="outline-of-workshop" class="slide level2">
 <h2>Outline of workshop</h2>
 <ul>
-<li>~X min: introductory lecture<br>
+<li>~15 min: introductory lecture<br>
 </li>
-<li>Walk through code (participation welcome)<br>
-</li>
-<li>(If time) Shiny app that works w/ spatial data</li>
+<li>Part 1: title of Roger’s exercise</li>
+<li>Part 2: Mapping raster and vector data</li>
 </ul>
 
 <img data-src="./images/Geospatial_R.png" width="650" class="r-stretch quarto-figure-left"><p class="caption">Source: Zia Ahmed</p></section>
@@ -400,12 +406,16 @@ Brittany Barker
 <h2>Why use R for GIS?</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<p><strong>Advantages</strong><br>
-- It’s <em>FREE</em>!!!<br>
-- Automate and repeat tasks<br>
-- Easier to make reproducible workflow<br>
-- Extend functionality<br>
-- Faster than pointing/clicking</p>
+<ul>
+<li><p><strong>Advantages</strong></p>
+<ul>
+<li><p>It’s <em>FREE</em>!!!</p></li>
+<li><p>Automate and repeat tasks</p></li>
+<li><p>Easier to make reproducible workflow</p></li>
+<li><p>Extend functionality</p></li>
+<li><p>Faster than pointing/clicking</p></li>
+</ul></li>
+</ul>
 <div class="cell" data-layout-align="left">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-left">
@@ -417,9 +427,13 @@ Brittany Barker
 </div>
 </div>
 </div><div class="column" style="width:50%;">
-<p><strong>Disadvantages</strong><br>
-- Sometimes a steep learning curve<br>
-- May be harder to quickly look at data</p>
+<ul>
+<li><p><strong>Disadvantages</strong></p>
+<ul>
+<li><p>Steep learning curve</p></li>
+<li><p>Sometimes harder to quickly look at data</p></li>
+</ul></li>
+</ul>
 <div class="cell" data-layout-align="left">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-left">
@@ -506,6 +520,31 @@ Brittany Barker
 </div>
 </div>
 </section>
+<section id="vector-vs.-raster" class="slide level2">
+<h2>Vector vs.&nbsp;raster</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>Multi-polygon: provinces of Spain</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="./images/pol_v_rast1.png" width="1000"></p>
+<figcaption>Source: Paula Moraga</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<p>Raster: average annual temperature in Spain</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="./images/pol_v_rast2.png" width="1000"></p>
+</div>
+</div>
+</div>
+</div>
+</section>
 <section id="types-of-spatial-features-raster-1" class="slide level2">
 <h2>Types of spatial features: raster</h2>
 <ul>
@@ -540,9 +579,13 @@ Brittany Barker
 <h2>R packages for working with rasters</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<p><code>terra</code> (successor of <code>raster</code>)<br>
-- Create, read/write, manipulate rasters<br>
-- Extensive documentation</p>
+<ul>
+<li><p><code>terra</code> (successor of <code>raster</code>)</p>
+<ul>
+<li><p>Create, read/write, manipulate rasters</p></li>
+<li><p>Extensive documentation</p></li>
+</ul></li>
+</ul>
 <div class="cell" data-layout-align="center-aligned">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -553,9 +596,13 @@ Brittany Barker
 </div>
 </div>
 </div><div class="column" style="width:50%;">
-<p><code>tidyterra</code><br>
-- Tidyverse methods for <code>terra</code> objects<br>
-- Provides <code>geoms</code> for plotting in <code>ggplot2</code></p>
+<ul>
+<li><p><code>tidyterra</code></p>
+<ul>
+<li><p>Tidyverse methods for <code>terra</code> objects</p></li>
+<li><p>Provides <code>geoms</code> for plotting in <code>ggplot2</code></p></li>
+</ul></li>
+</ul>
 <div class="cell" data-layout-align="center-aligned">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -570,10 +617,13 @@ Brittany Barker
 </section>
 <section id="r-packages-for-working-with-rasters-1" class="slide level2">
 <h2>R packages for working with rasters</h2>
-<p><code>stars</code>(spatiotemporal arrays)<br>
-- Has a few abilities lacking in <code>terra</code> (e.g., non-regular shapes)<br>
-- Many <code>sf</code> functions work with stars objects<br>
-- Not as well documented</p>
+<ul>
+<li><p><code>stars</code>(spatiotemporal arrays)</p>
+<ul>
+<li><p>Has a few abilities lacking in <code>terra</code> (e.g., non-regular shapes)</p></li>
+<li><p>Many <code>sf</code> functions work with stars objects Not as well documented</p></li>
+</ul></li>
+</ul>
 
 <img data-src="./images/stars_raster_data.png" width="700" class="r-stretch quarto-figure-center"><p class="caption">Source: Edzer Pebesama</p></section>
 <section id="layering" class="slide level2">
@@ -625,7 +675,31 @@ Brittany Barker
 </div>
 </div>
 </div>
-<div class="footer footer-default">
+</section>
+<section id="coordinate-reference-system-crs" class="slide level2">
+<h2>Coordinate reference system (CRS)</h2>
+<ul>
+<li>Coordinate system: X, Y grid upon which data is overlaid<br>
+</li>
+<li>Units: horizontal &amp; vertical units of grid (e.g., km, miles)<br>
+</li>
+<li>Datum: defines origin used to place the coordinate system in space<br>
+</li>
+<li>Projection: equation used to flatten objects to 2D surface</li>
+</ul>
+
+<img data-src="./images/datum_v_proj.gif" width="700" class="r-stretch quarto-figure-center"><p class="caption">Source: Bill Huber, https://www.directionsmag.com/article/4048</p></section>
+<section id="why-is-the-crs-important" class="slide level2">
+<h2>Why is the CRS important?</h2>
+<ul>
+<li>Provide a framework for precisely measuring locations on earth’s surface<br>
+</li>
+<li>You’ll get errors or mistakes when using inconsistent CRS<br>
+</li>
+<li>For example, distances will vary, and overlaid features won’t match</li>
+</ul>
+
+<img data-src="./images/us_projections.jpg" width="1000" class="r-stretch quarto-figure-center"><p class="caption">Planar (left), conic (middle), and cylindrical (right) projections. Source: https://gistbok.ucgis.org/bok-topics/map-projections</p><div class="footer footer-default">
 
 </div>
 </section>
