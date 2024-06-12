@@ -752,11 +752,7 @@ summary:
 \- `ggplot2` has several functions for plotting rasters including:
 
 -   `geom_raster()` or `geom_tile()`: require a data frame
-
-<!-- -->
-
 -   `geom_spatraster()`: requires a SpatRaster object
-
 -   `geom_stars()`: uses the `stars` package, which was not covered here
 
 ## **Potentially useful tutorials, free books, etc.**
