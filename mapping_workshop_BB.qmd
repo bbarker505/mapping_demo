@@ -122,7 +122,7 @@ lilacModel_r2 <- classify(lilacModel_r, classes)
 plot(lilacModel_r2, type="classes", col = rev(viridis::viridis(length(classes))))
 ```
 
-----
+------------------------------------------------------------------------
 
 [**Question 1**]{.underline}**:** How does predicted lilac leaf out vary
 across the contiguous U.S.? Any ideas what may explain these patterns?
@@ -130,7 +130,7 @@ across the contiguous U.S.? Any ideas what may explain these patterns?
 Answer: Leaf out occurs earlier in southern latitudes because warmer
 temperatures there drive faster development.
 
-----
+------------------------------------------------------------------------
 
 The `plot()` function has several other options for customizing maps.
 Below, I added a title, put axis labels on 3 sides.
@@ -268,7 +268,7 @@ ggplot() +
   my_theme # Our custom theme
 ```
 
-----
+------------------------------------------------------------------------
 
 [**Challenge 1**]{.underline}**:** Change at least two plot features to
 align with your preferences. For example, you could remove the plot axes
@@ -279,7 +279,7 @@ align with your preferences. For example, you could remove the plot axes
 
 ```
 
-----
+------------------------------------------------------------------------
 
 FYI: The [`ggsn`](https://oswaldosantos.github.io/ggsn/) package has
 functions to add a scale bar and north arrow. Check it out sometime!
@@ -311,7 +311,7 @@ states <- st_read("./data/states.shp")
 plot(states[1])
 ```
 
-----
+------------------------------------------------------------------------
 
 [**Question 2**]{.underline}**:** What is the class and geometry type of
 `states`? Describe two other differences between `states` and
@@ -322,7 +322,7 @@ contains geographic information such as geometry, extent, and CRS,
 whereas the data frame has associated data, such as state names and
 abbreviations.
 
-----
+------------------------------------------------------------------------
 
 We're going to run into issues due to differing coordinate reference
 systems (CRS) of `states` and `lilacModel_r`. You can see these
@@ -360,7 +360,7 @@ states_c <- st_crop(states, lilacModel_r)
 plot(states_c[1])
 ```
 
-----
+------------------------------------------------------------------------
 
 [**Challenge 2**]{.underline}**:** Can you think of a `dplyr` approach
 to obtaining data only for CONUS? Hint: remove rows with undesired
@@ -371,7 +371,7 @@ states_c2 <- filter(states, !stusps %in% c("AK", "HI", "PR"))
 plot(states_c2[1])
 ```
 
-----
+------------------------------------------------------------------------
 
 Finally, use `geom_sf()` to add an `sf` object to a plot - i.e., the
 states feature.
@@ -386,7 +386,7 @@ ggplot() +
   my_theme
 ```
 
-----
+------------------------------------------------------------------------
 
 [**Question 3**]{.underline}**:** What happens when you don't enter `NA`
 for the fill option for the `states_c` feature? Why?
@@ -394,7 +394,7 @@ for the fill option for the `states_c` feature? Why?
 Answer: the states features covers up the raster data because it's
 multi-polygon data. The default fill color is gray.
 
-----
+------------------------------------------------------------------------
 
 You could just continue to use fill = `NA`, or convert the geometry of
 `states_c` to `MULTILINESTRING` using the `st_cast()` function.
@@ -540,7 +540,7 @@ lilacObs_sf$geometry
 states$geometry
 ```
 
-----
+------------------------------------------------------------------------
 
 [**Question 4**]{.underline}**:** How does the geometry of the lilac
 observations (`lilacObs_sf`) differ from the states feature? Why?
@@ -549,7 +549,7 @@ Answer: the lilac observations have a POINT geometry whereas the states
 data have a MULTIPOLYGON geometry. Observations are from single
 locations, whereas state boundaries cover many points over the U.S.
 
-----
+------------------------------------------------------------------------
 
 Now let's add the phenometric data so we can visualize spatial
 concordance between model-predicted and observed dates for first leaf
@@ -581,7 +581,7 @@ ggsave(conus_modVobs, filename = "./plots/Lilac_leaf_out_modelVsObs_2018.png",
        dpi = 300, units = c('in'), width = 10, height = 6)
 ```
 
-----
+------------------------------------------------------------------------
 
 [**Question 5**]{.underline}**:** What does your map tell you about
 predicted vs. observed first leaf out in lilac? Can you think of a
@@ -595,7 +595,7 @@ were much later than predicted dates. In this case, perhaps the
 volunteers failed to notice that lilac leaf out had already occurred,
 although other explanations are possible.
 
-----
+------------------------------------------------------------------------
 
 #### **Combining different maps**
 
@@ -719,7 +719,7 @@ range(differences)
 median(differences)
 ```
 
-----
+------------------------------------------------------------------------
 
 [**Question 6**]{.underline}**:** What information do your simple
 analyses provide that can't be seen on a map? Overall, what do the
@@ -732,7 +732,7 @@ outliers are likely due to observer error, as we noted above. The model
 actually seems to perform pretty well if we reduce the impact of
 outliers by calculating the median difference, which is only 1 day.
 
-----
+------------------------------------------------------------------------
 
 ## **Wrap-up**
 
@@ -753,9 +753,8 @@ summary:
 
 -   `geom_raster()` or `geom_tile()`: require a data frame
 
-```{=html}
 <!-- -->
-```
+
 -   `geom_spatraster()`: requires a SpatRaster object
 
 -   `geom_stars()`: uses the `stars` package, which was not covered here
@@ -785,8 +784,8 @@ R](https://zia207.github.io/geospatial-r-github.io/) by Zia Ahmed\
 - [Introduction to GIS with
 R](https://www.jessesadler.com/post/gis-with-r-intro/) by Jesse Sadler\
 - [GIS and Spatial Analysis with
-R](https://mgimond.github.io/MEGUG2016/Tutorial.html) by Manny Gimmond \
-- Vignette for [sf](https://r-spatial.github.io/sf/articles/sf1.html) \
+R](https://mgimond.github.io/MEGUG2016/Tutorial.html) by Manny Gimmond\
+- Vignette for [sf](https://r-spatial.github.io/sf/articles/sf1.html)\
 - [R as GIS for
 Economists](https://tmieno2.github.io/R-as-GIS-for-Economists/create-maps.html)
 by Taro Mieno

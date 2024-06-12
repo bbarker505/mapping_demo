@@ -12,7 +12,6 @@ format:
     slide-number: c/t
     width: 1600
     height: 900
-    css: ["theme/theme.css"]
     theme: simple
     echo: true
 ---
@@ -91,15 +90,13 @@ knitr::include_graphics("./images/GIS.png")
 ::: {.column width="50%"}
 -   **Advantages**
 
-    -    It's *FREE*!!!
+    -   It's *FREE*!!!
 
-    -   Automate and repeat tasks
+    -   Automate and repeat tasks (faster)
 
     -   Easier to make reproducible workflow
 
     -   Extend functionality
-
-    -   Faster than pointing/clicking
 
 ```{r, out.width = "650px", echo=FALSE, fig.align="left", fig.cap="Source: Aleks Buczkowski 2023"}
 knitr::include_graphics("./images/Why-is-ArcGIS-So-Expensive.png")
@@ -285,13 +282,13 @@ knitr::include_graphics("./images/ggplot_plots.png")
 
 ::: columns
 ::: {.column width="75%"}
-```{r, echo = FALSE, out.width = "1500px", fig.cap="center-aligned", fig.cap="Source: Barker et al. (2023) *Frontiers in Insect Science*"}
+```{r, echo = FALSE, out.width = "1100px"}
 knitr::include_graphics("./images/EAB_map.png")
 ```
 :::
 
 ::: {.column width="25%"}
-```{r, echo = FALSE, out.width = "250px"}
+```{r, echo = FALSE, out.width = "250px", fig.cap="Source: Barker et al. (2023) *Front. Insect Sci.*"}
 knitr::include_graphics("./images/emerald-ash-borer-on-leaf.png")
 ```
 :::
@@ -304,17 +301,16 @@ knitr::include_graphics("./images/emerald-ash-borer-on-leaf.png")
 -   Datum: defines origin used to place the coordinate system in space\
 -   Projection: equation used to flatten objects to 2D surface
 
-```{r, echo = FALSE, out.width = "700px", fig.cap = "Source: Bill Huber, https://www.directionsmag.com/article/4048"}
-knitr::include_graphics("./images/datum_v_proj.gif")
+```{r, echo = FALSE, out.width = "700px", fig.align = "left", fig.cap = "Source: Bill Huber, https://www.directionsmag.com"}
+knitr::include_graphics("./images/datum_v_proj.png")
 ```
 
 ## Why is the CRS important?
 
--   Provide a framework for precisely measuring locations on earth's
-    surface\
--   You'll get errors or mistakes when using inconsistent CRS\
--   For example, distances will vary, and overlaid features won't match
+-   Framework for precisely measuring locations on earth's surface\
+-   Errors or mistakes occur when using inconsistent CRS\
+-   For example, mismatched features and incorrect distance measurements
 
-```{r, echo = FALSE, out.width = "1000px", fig.cap = "Planar (left), conic (middle), and cylindrical (right) projections. Source: https://gistbok.ucgis.org/bok-topics/map-projections"}
+```{r, echo = FALSE, out.width = "1000px", fig.align="left", fig.cap = "Source: opennews.org"}
 knitr::include_graphics("./images/us_projections.jpg")
 ```
